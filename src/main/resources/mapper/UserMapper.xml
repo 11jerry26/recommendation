@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.recommendation.mapper.UserMapper">
+    <!-- 新增用户 -->
+    <insert id="insertUser" parameterType="com.example.recommendation.entity.User">
+        INSERT INTO user (username, password, name, phone)
+        VALUES (#{username}, #{password},#{name}, #{phone})
+    </insert>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectUserByAccount" resultType="com.example.recommendation.entity.User" parameterType="String">
+        SELECT * FROM user WHERE account = #{account}
+    </select>
+
+    <!-- 查询所有用户名 -->
+    <select id="findAllAccount" resultType="String">
+        select account from user
+    </select>
+</mapper>
