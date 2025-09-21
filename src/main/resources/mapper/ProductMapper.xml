@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.recommendation.mapper.ProductMapper">
+
+<!--    分页查询商品列表-->
+    <select id="getProductByPage" resultType="com.example.recommendation.entity.Product">
+        SELECT
+        productId,
+        productName,
+        price,
+        fileName,
+        productCategory,
+        description,
+        productSecondCategory
+        FROM product
+        ORDER BY productId DESC
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+</mapper>

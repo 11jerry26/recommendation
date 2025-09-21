@@ -1,7 +1,7 @@
 package com.example.recommendation.entity;
 
 public class User {
-    private String userId;
+    private int userId;
     private String account;
     private String userName;
     private String password;
@@ -10,11 +10,11 @@ public class User {
     private String address;
     public User(){}
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
