@@ -1,7 +1,10 @@
 package com.example.recommendation.controller;
 
+import com.example.recommendation.entity.CartProduct;
+import com.example.recommendation.entity.Product;
 import com.example.recommendation.entity.Result;
 import com.example.recommendation.entity.UserBehavior;
+import com.example.recommendation.entity.request.AddCartDTO;
 import com.example.recommendation.service.BehaviorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,7 @@ public class BehaviorController {
     @Autowired
     private BehaviorService behaviorService;
 
+    //浏览
     @PostMapping("/browseProduct")
     public Result browseProduct(@RequestBody UserBehavior userBehavior) {
         try {
@@ -24,6 +28,7 @@ public class BehaviorController {
         }
     }
 
+    //收藏
     @PostMapping("/collectProduct")
     public Result collectProduct(@RequestBody UserBehavior userBehavior) {
         try {
@@ -40,6 +45,42 @@ public class BehaviorController {
         try {
             boolean isCollected = behaviorService.searchCollectStatus(userBehavior);
             return new Result(200,isCollected,"查询收藏记录成功");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
+
+    //加购
+    @PostMapping("/addCart")
+    public Result addCart(@RequestBody AddCartDTO addCartDTO) {
+        try {
+            int result1 = behaviorService.addCart(addCartDTO);
+            int result2 = behaviorService.addCartBehavior(addCartDTO);
+            boolean result = result1 != 0 && result2 != 0;
+            return new Result(200,result,"添加商品到购物车成功！");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/getAllCartProduct")
+    public Result getAllCartProduct(@RequestBody UserBehavior userBehavior) {
+        try {
+            CartProduct[] products = behaviorService.getAllCartProduct(userBehavior);
+            return new Result(200,products,"查询购物车列表成功！");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/changeCartProductCount")
+    public Result changeCartProductCount(@RequestBody AddCartDTO addCartDTO) {
+        try {
+            int result = behaviorService.changeCartProductCount(addCartDTO);
+            return new Result(200,result,"修改购物车商品数量成功！");
         } catch (Exception e) {
             // 服务器异常：属于“请求处理失败”，返回code=500
             return new Result(500, null, "服务器内部错误：" + e.getMessage());

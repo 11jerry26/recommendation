@@ -55,4 +55,67 @@
           AND behaviorTypeId = #{behaviorTypeId}
             LIMIT 1
     </select>
+
+    <insert id="addCart">
+        INSERT INTO cart
+            (userId, productId, count)
+        VALUES
+            (#{userId}, #{productId},#{count})
+    </insert>
+
+    <insert id="addCartBehavior">
+        INSERT INTO user_behavior
+            (userId, productId, behaviorTypeId, behaviorTime, isDelete)
+        VALUES
+            (#{userId}, #{productId}, #{behaviorTypeId}, #{behaviorTime}, #{isDelete})
+    </insert>
+
+    <select id="getAllCartProduct" resultType="com.example.recommendation.entity.CartProduct">
+        SELECT
+            p.*,
+            c.count AS cartCount
+        FROM
+            cart c
+                INNER JOIN
+            product p ON c.productId = p.productId
+        WHERE
+            c.userId = #{userId}
+    </select>
+
+    <select id="searchCartProduct" resultType="int">
+        SELECT COUNT(*)
+        FROM cart
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+    </select>
+
+    <select id="searchCartBehavior" resultType="int">
+        SELECT COUNT(*)
+        FROM user_behavior
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+          AND behaviorTypeId = #{behaviorTypeId}
+    </select>
+
+    <update id="addCartProductCount">
+        UPDATE cart
+        SET count = count + #{count}
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+    </update>
+
+    <update id="updateCartBehavior">
+        UPDATE user_behavior
+        SET behaviorTime = #{behaviorTime},
+            isDelete = #{isDelete}
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+    </update>
+
+    <update id="changeCartProductCount">
+        UPDATE cart
+        SET count = #{count}
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+    </update>
 </mapper>
