@@ -1,6 +1,7 @@
 package com.example.recommendation.service.impl;
 
 import com.example.recommendation.entity.Product;
+import com.example.recommendation.entity.UserBehavior;
 import com.example.recommendation.mapper.ProductMapper;
 import com.example.recommendation.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,4 +18,5 @@ public class ProductServiceImpl implements ProductService {
         int offset = (pageNum - 1) * pageSize;
         return productMapper.getProductByPage(offset, pageSize, userId);
     }
+
 }

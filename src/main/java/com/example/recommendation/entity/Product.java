@@ -8,6 +8,7 @@ public class Product {
     private String fileName;
     private String description;
     private Double price;
+    private int sellCount;
 
     public Product() {}
 
@@ -77,6 +78,14 @@ public class Product {
         this.price = price;
     }
 
+    public int getSellCount() {
+        return sellCount;
+    }
+
+    public void setSellCount(int sellCount) {
+        this.sellCount = sellCount;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -87,6 +96,7 @@ public class Product {
                 ", fileName='" + fileName + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
+                ", sellCount=" + sellCount +
                 '}';
     }
 }

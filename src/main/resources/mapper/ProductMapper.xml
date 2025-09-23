@@ -13,10 +13,10 @@
         fileName,
         productCategory,
         description,
-        productSecondCategory
+        productSecondCategory,
+        sellCount
         FROM product
         ORDER BY productId DESC
             LIMIT #{offset}, #{pageSize}
     </select>
-
 </mapper>
