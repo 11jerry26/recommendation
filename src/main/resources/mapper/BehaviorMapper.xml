@@ -110,6 +110,7 @@
             isDelete = #{isDelete}
         WHERE userId = #{userId}
           AND productId = #{productId}
+        AND behaviorTypeId = #{behaviorTypeId}
     </update>
 
     <update id="changeCartProductCount">
@@ -118,4 +119,35 @@
         WHERE userId = #{userId}
           AND productId = #{productId}
     </update>
+
+    <delete id="deleteCartProduct">
+        DELETE FROM cart
+        WHERE userId = #{userId}
+          AND productId = #{productId}
+    </delete>
+
+    <update id="updateProductSellCount">
+        UPDATE product
+        SET sellCount = #{sellCount}
+        WHERE productId = #{productId}
+    </update>
+
+    <insert id="insertOrder">
+        INSERT INTO `order` (
+            userId,
+            productId,
+            count,
+            price,
+            createTime ,
+            isDelete
+        )
+        VALUES (
+                   #{userId},
+                   #{productId},
+                   #{count},
+                   #{price},
+                   #{createTime},
+                   #{isDelete}
+               )
+    </insert>
 </mapper>

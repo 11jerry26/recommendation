@@ -44,8 +44,18 @@ public interface BehaviorMapper {
     public int addCartProductCount(int userId,int productId,int count);
 
     //更新添加购物车行为
-    public int updateCartBehavior(int userId,int productId,String behaviorTime, int isDelete);
+    public int updateCartBehavior(int userId,int productId,int behaviorTypeId,String behaviorTime, int isDelete);
 
     //更新购物车商品数量
     public int changeCartProductCount(int userId,int productId, int count);
+
+    //删除购物车表记录
+    public int deleteCartProduct(int userId,int productId);
+
+    //购买后修改商品销售量
+    public int updateProductSellCount(int productId, int sellCount);
+
+    //新增订单记录
+    public int insertOrder(int userId,int productId,int count, double price,String createTime,int isDelete);
+
 }

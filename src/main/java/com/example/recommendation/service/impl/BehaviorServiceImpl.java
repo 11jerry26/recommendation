@@ -1,9 +1,12 @@
 package com.example.recommendation.service.impl;
 
 import com.example.recommendation.entity.CartProduct;
+import com.example.recommendation.entity.Product;
 import com.example.recommendation.entity.UserBehavior;
 import com.example.recommendation.entity.request.AddCartDTO;
+import com.example.recommendation.entity.request.PurchaseDTO;
 import com.example.recommendation.mapper.BehaviorMapper;
+import com.example.recommendation.mapper.ProductMapper;
 import com.example.recommendation.service.BehaviorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,8 @@ import java.util.Map;
 public class BehaviorServiceImpl implements BehaviorService {
     @Autowired
     BehaviorMapper behaviorMapper;
+    @Autowired
+    ProductMapper productMapper;
 
     @Override
     public boolean browseProduct(UserBehavior userBehavior) {
@@ -89,7 +94,7 @@ public class BehaviorServiceImpl implements BehaviorService {
         int result = 0;
         if (isExist > 0) {
             //如果行为表中已添加过这个商品，那么更新行为时间到最新
-            result = behaviorMapper.updateCartBehavior(userId,productId,behaviorTime,isDelete);
+            result = behaviorMapper.updateCartBehavior(userId,productId,behaviorTypeId,behaviorTime,isDelete);
         } else {
             //否则新增行为
             result = behaviorMapper.addCartBehavior(userId,productId,behaviorTypeId,behaviorTime,isDelete);
@@ -110,5 +115,41 @@ public class BehaviorServiceImpl implements BehaviorService {
         int cartCount = addCartDTO.getCount();
         int result = behaviorMapper.changeCartProductCount(userId,productId,cartCount);
         return result;
+    }
+
+    @Override
+    public int deleteCartProduct(UserBehavior userBehavior) {
+        int userId = userBehavior.getUserId();
+        int productId = userBehavior.getProductId();
+        int behaviorTypeId = userBehavior.getBehaviorTypeId();
+        String behaviorTime = userBehavior.getBehaviorTime();
+        int result1 = behaviorMapper.updateCartBehavior(userId,productId,behaviorTypeId,behaviorTime,1);
+        int result2 = behaviorMapper.deleteCartProduct(userId,productId);
+        return result1 + result2;
+    }
+
+    @Override
+    public int purchaseCartProduct(PurchaseDTO[] purchaseDTOS) {
+        for (PurchaseDTO dto : purchaseDTOS) {
+            int userId = dto.getUserId();
+            int productId = dto.getProductId();
+            int sellCount = dto.getSellCount();
+            int cartCount = dto.getCartCount();
+            Product product = productMapper.getProductInfoById(productId);
+            double price = product.getPrice();
+            double totalPrice = cartCount * price;
+            String behaviorTime = dto.getBehaviorTime();
+
+
+            //清除购物车表
+            int deleteCart = behaviorMapper.deleteCartProduct(userId,productId);
+            //修改该商品销量
+            int updateProductSellCount = behaviorMapper.updateProductSellCount(productId,sellCount + cartCount);
+            //新增购物行为
+            int addPurchaseBehavior = behaviorMapper.addCartBehavior(userId,productId,4,behaviorTime,0);
+            //新增订单记录
+            int addOrder = behaviorMapper.insertOrder(userId,productId,cartCount,totalPrice,behaviorTime,0);
+        }
+        return 0;
     }
 }

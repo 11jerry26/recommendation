@@ -19,4 +19,18 @@
         ORDER BY productId DESC
             LIMIT #{offset}, #{pageSize}
     </select>
+
+    <select id="getProductInfoById" resultType="com.example.recommendation.entity.Product">
+        SELECT
+        productId,
+        productName,
+        price,
+        fileName,
+        productCategory,
+        description,
+        productSecondCategory,
+        sellCount
+        FROM product
+        WHERE productId = #{productId}
+    </select>
 </mapper>

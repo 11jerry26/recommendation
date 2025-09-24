@@ -3,6 +3,7 @@ package com.example.recommendation.service;
 import com.example.recommendation.entity.CartProduct;
 import com.example.recommendation.entity.UserBehavior;
 import com.example.recommendation.entity.request.AddCartDTO;
+import com.example.recommendation.entity.request.PurchaseDTO;
 
 public interface BehaviorService {
     //浏览
@@ -17,4 +18,6 @@ public interface BehaviorService {
     public int addCartBehavior(AddCartDTO addCartDTO);
     public CartProduct[] getAllCartProduct(UserBehavior userBehavior);
     public int changeCartProductCount(AddCartDTO addCartDTO);
+    public int deleteCartProduct(UserBehavior userBehavior);
+    public int purchaseCartProduct(PurchaseDTO[] purchaseDTOS);
 }
