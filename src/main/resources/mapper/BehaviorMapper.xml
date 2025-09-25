@@ -150,4 +150,28 @@
                    #{isDelete}
                )
     </insert>
+
+    <select id="selectUserCollectProductIds" resultType="int">
+        SELECT productId
+        FROM user_behavior
+        WHERE
+            userId = #{userId}
+          AND behaviorTypeId = #{behaviorTypeId}
+          AND isDelete = #{isDelete}
+    </select>
+
+    <select id="selectUserOrders" resultType="com.example.recommendation.entity.Order">
+        SELECT
+            id,
+            userId,
+            productId,
+            count,
+            price,
+            createTime,
+            isDelete
+        FROM `order`
+        WHERE
+            userId = #{userId}
+          AND isDelete = #{isDelete}
+    </select>
 </mapper>

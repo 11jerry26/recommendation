@@ -1,9 +1,6 @@
 package com.example.recommendation.controller;
 
-import com.example.recommendation.entity.CartProduct;
-import com.example.recommendation.entity.Product;
-import com.example.recommendation.entity.Result;
-import com.example.recommendation.entity.UserBehavior;
+import com.example.recommendation.entity.*;
 import com.example.recommendation.entity.request.AddCartDTO;
 import com.example.recommendation.entity.request.PurchaseDTO;
 import com.example.recommendation.service.BehaviorService;
@@ -104,6 +101,28 @@ public class BehaviorController {
         try {
             int result = behaviorService.purchaseCartProduct(purchaseDTOS);
             return new Result(200,result,"购物车商品购买成功！");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/getMyCollection")
+    public Result getMyCollection(@RequestBody UserBehavior userBehavior) {
+        try {
+            Product[] products = behaviorService.selectUserCollection(userBehavior);
+            return new Result(200,products,"查询收藏成功！");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/getMyOrder")
+    public Result getMyOrder(@RequestBody UserBehavior userBehavior) {
+        try {
+            Order[] orders = behaviorService.selectUserOrder(userBehavior);
+            return new Result(200,orders,"查询订单成功！");
         } catch (Exception e) {
             // 服务器异常：属于“请求处理失败”，返回code=500
             return new Result(500, null, "服务器内部错误：" + e.getMessage());

@@ -19,4 +19,9 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.getProductByPage(offset, pageSize, userId);
     }
 
+    @Override
+    public Product getProductById(int productId) {
+        return productMapper.getProductInfoById(productId);
+    }
+
 }

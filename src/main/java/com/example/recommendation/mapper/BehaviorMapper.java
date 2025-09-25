@@ -1,10 +1,12 @@
 package com.example.recommendation.mapper;
 
 import com.example.recommendation.entity.CartProduct;
+import com.example.recommendation.entity.Order;
 import com.example.recommendation.entity.Product;
 import com.example.recommendation.entity.UserBehavior;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -58,4 +60,9 @@ public interface BehaviorMapper {
     //新增订单记录
     public int insertOrder(int userId,int productId,int count, double price,String createTime,int isDelete);
 
+    //查询用户收藏商品ID列表
+    public List<Integer> selectUserCollectProductIds(int userId, int behaviorTypeId, int isDelete);
+
+    //根据用户id查询用户订单列表
+    public List<Order> selectUserOrders(int userId,int isDelete);
 }

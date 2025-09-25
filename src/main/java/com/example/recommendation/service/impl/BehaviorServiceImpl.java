@@ -1,6 +1,7 @@
 package com.example.recommendation.service.impl;
 
 import com.example.recommendation.entity.CartProduct;
+import com.example.recommendation.entity.Order;
 import com.example.recommendation.entity.Product;
 import com.example.recommendation.entity.UserBehavior;
 import com.example.recommendation.entity.request.AddCartDTO;
@@ -11,6 +12,7 @@ import com.example.recommendation.service.BehaviorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -151,5 +153,36 @@ public class BehaviorServiceImpl implements BehaviorService {
             int addOrder = behaviorMapper.insertOrder(userId,productId,cartCount,totalPrice,behaviorTime,0);
         }
         return 0;
+    }
+
+    @Override
+    public Order[] selectUserOrder(UserBehavior userBehavior) {
+        int userId = userBehavior.getUserId();
+        int isDelete = userBehavior.getIsDelete();
+        List<Order> orderList = behaviorMapper.selectUserOrders(userId, isDelete);
+        Order[] orders = orderList.toArray(new Order[0]);
+
+        return orders;
+    }
+
+    @Override
+    public Product[] selectUserCollection(UserBehavior userBehavior) {
+        int userId = userBehavior.getUserId();
+        int behaviorTypeId = userBehavior.getBehaviorTypeId();
+        List<Integer> productIds = behaviorMapper.selectUserCollectProductIds(userId,behaviorTypeId,0);
+
+        if (productIds == null || productIds.isEmpty()) {
+            return new Product[0];
+        }
+
+        Product[] productArray = new Product[productIds.size()];
+
+        // 遍历ID列表，查询商品对象并填充数组
+        for (int i = 0; i < productIds.size(); i++) {
+            Integer productId = productIds.get(i);
+            Product product = productMapper.getProductInfoById(productId);
+            productArray[i] = product;
+        }
+        return productArray;
     }
 }
