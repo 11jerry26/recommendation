@@ -20,6 +20,24 @@
             LIMIT #{offset}, #{pageSize}
     </select>
 
+    <!--    分类分页查询商品列表-->
+    <select id="getProductByCategory" resultType="com.example.recommendation.entity.Product">
+        SELECT
+            productId,
+            productName,
+            price,
+            fileName,
+            productCategory,
+            description,
+            productSecondCategory,
+            sellCount
+        FROM product
+        WHERE
+            productCategory = #{category}
+        ORDER BY productId DESC
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
     <select id="getProductInfoById" resultType="com.example.recommendation.entity.Product">
         SELECT
         productId,
