@@ -18,4 +18,8 @@
     <select id="findAllAccount" resultType="String">
         select account from user
     </select>
+
+    <select id="selectUserTotalCount" resultType="int">
+        SELECT COUNT(*) FROM user
+    </select>
 </mapper>

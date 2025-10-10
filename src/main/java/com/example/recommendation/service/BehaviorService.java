@@ -26,5 +26,6 @@ public interface BehaviorService {
 
 
     public Order[] selectUserOrder(UserBehavior userBehavior);
+    public int deleteUserOrder(Order order);
 
 }

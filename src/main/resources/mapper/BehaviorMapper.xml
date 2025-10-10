@@ -174,4 +174,41 @@
             userId = #{userId}
           AND isDelete = #{isDelete}
     </select>
+
+    <update id="deleteUserOrder">
+        UPDATE `order`
+        SET isDelete = #{isDelete}
+        WHERE id = #{id}
+    </update>
+
+    <select id="listUserValidBehaviorsByUserId" resultType="com.example.recommendation.entity.UserBehavior">
+        SELECT
+            id,
+            userId,
+            productId,
+            behaviorTypeId,
+            behaviorTime
+        FROM
+            user_behavior
+        WHERE
+            userId = #{userId}
+          AND isDelete = 0
+        ORDER BY
+            behaviorTime DESC
+    </select>
+
+    <select id="selectRecentBehaviors" resultType="com.example.recommendation.entity.UserBehavior">
+        SELECT *
+        FROM user_behavior
+        WHERE isDelete = 0
+        ORDER BY behaviorTime DESC
+            LIMIT #{count}
+    </select>
+
+    <select id="selectProductIdsByUserId" resultType="java.lang.Integer">
+        SELECT productId
+        FROM user_behavior
+        WHERE userId = #{userId} AND isDelete = 0 AND behaviorTypeId = 4
+        ORDER BY behaviorTime DESC
+    </select>
 </mapper>

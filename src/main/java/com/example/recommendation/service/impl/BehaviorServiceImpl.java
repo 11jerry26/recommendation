@@ -166,6 +166,12 @@ public class BehaviorServiceImpl implements BehaviorService {
     }
 
     @Override
+    public int deleteUserOrder(Order order) {
+        int id = order.getId();
+        return behaviorMapper.deleteUserOrder(id,1);
+    }
+
+    @Override
     public Product[] selectUserCollection(UserBehavior userBehavior) {
         int userId = userBehavior.getUserId();
         int behaviorTypeId = userBehavior.getBehaviorTypeId();

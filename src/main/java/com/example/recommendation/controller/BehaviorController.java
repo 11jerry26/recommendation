@@ -128,4 +128,16 @@ public class BehaviorController {
             return new Result(500, null, "服务器内部错误：" + e.getMessage());
         }
     }
+
+    @PostMapping("/deleteUserOrder")
+    public Result deleteUserOrder(@RequestBody Order order) {
+        try {
+            Order receive = order;
+            int result = behaviorService.deleteUserOrder(order);
+            return new Result(200,result,"删除订单成功！");
+        } catch (Exception e) {
+            // 服务器异常：属于“请求处理失败”，返回code=500
+            return new Result(500, null, "服务器内部错误：" + e.getMessage());
+        }
+    }
 }

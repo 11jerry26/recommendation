@@ -15,4 +15,7 @@ public interface UserMapper {
 
         //查询所有用户名
         public List<String> findAllAccount();
+
+        //查询总用户数量
+        public int selectUserTotalCount();
 }

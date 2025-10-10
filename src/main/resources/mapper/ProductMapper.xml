@@ -33,4 +33,17 @@
         FROM product
         WHERE productId = #{productId}
     </select>
+
+    <select id="selectProductTotalCount" resultType="int">
+        SELECT COUNT(*) FROM product
+    </select>
+
+    <select id="selectProductsByIds" resultType="com.example.recommendation.entity.Product">
+        SELECT *
+        FROM product
+        WHERE productId IN
+        <foreach collection="projectIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

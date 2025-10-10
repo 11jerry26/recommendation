@@ -2,6 +2,7 @@ package com.example.recommendation.mapper;
 
 import com.example.recommendation.entity.Product;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -12,4 +13,10 @@ public interface ProductMapper {
 
     //根据商品id查询商品
     public Product getProductInfoById(int productId);
+
+    //查询总商品数
+    public int selectProductTotalCount();
+
+    //根据商品id列表查询商品列表
+    public List<Product> selectProductsByIds(@Param("projectIds") List<Integer> projectIds);
 }

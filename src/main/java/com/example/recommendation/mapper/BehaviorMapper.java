@@ -65,4 +65,21 @@ public interface BehaviorMapper {
 
     //根据用户id查询用户订单列表
     public List<Order> selectUserOrders(int userId,int isDelete);
+
+    //删除用户订单
+    public int deleteUserOrder(int id,int isDelete);
+
+
+
+
+    //个性化推荐相关
+
+    //查询用户的有效行为（isDelete = 0），并按时间升序排序
+    public List<UserBehavior> listUserValidBehaviorsByUserId(Integer userId);
+
+    // 获取所有用户最近的行为数据
+    public List<UserBehavior> selectRecentBehaviors(Integer count);
+
+    //获取用户已经购买过的商品id
+    public List<Integer> selectProductIdsByUserId(int userId);
 }
