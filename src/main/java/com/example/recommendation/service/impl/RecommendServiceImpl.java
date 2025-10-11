@@ -96,6 +96,9 @@ public class RecommendServiceImpl implements RecommendService {
      * 构建神经协同过滤（NCF）模型 (使用 ComputationGraph，无需 MergeLayer)
      */
     private ComputationGraph buildNCFModelWithComputationGraph() {
+        //商品分类总数
+        int numCategories = productMapper.selectCategoryCount();
+
         // 定义计算图的配置
         ComputationGraphConfiguration.GraphBuilder confBuilder = new NeuralNetConfiguration.Builder()
                 .seed(123)
@@ -104,7 +107,7 @@ public class RecommendServiceImpl implements RecommendService {
                 .graphBuilder()
 
                 // --- 1. 定义输入 ---
-                .addInputs("userInput", "itemInput")
+                .addInputs("userInput", "itemInput","categoryInput")
 
                 // --- 2. 定义用户嵌入分支 ---
                 .addLayer("userEmbedding", new EmbeddingLayer.Builder()
@@ -122,14 +125,22 @@ public class RecommendServiceImpl implements RecommendService {
                                 .build(),
                         "itemInput") // 将该层连接到 "itemInput" 输入
 
+                // --- 商品类别嵌入分支 ---
+                .addLayer("categoryEmbedding", new EmbeddingLayer.Builder()
+                                .nIn(numCategories)
+                                .nOut(EMBEDDING_SIZE)
+                                .weightInit(WeightInit.XAVIER)
+                                .build(),
+                        "categoryInput")
+
                 // --- 4. 合并嵌入向量 (核心替代方案) ---
                 // 使用 MergeVertex 来拼接两个嵌入层的输出
                 // 拼接后的向量长度 = EMBEDDING_SIZE + EMBEDDING_SIZE
-                .addVertex("merge", new MergeVertex(), "userEmbedding", "itemEmbedding")
+                .addVertex("merge", new MergeVertex(), "userEmbedding", "itemEmbedding", "categoryEmbedding")
 
                 // --- 5. 定义主网络部分 ---
                 .addLayer("dense1", new DenseLayer.Builder()
-                                .nIn(EMBEDDING_SIZE * 2) // 输入维度是合并后的向量大小
+                                .nIn(EMBEDDING_SIZE * 2 + EMBEDDING_SIZE) // 输入维度是合并后的向量大小
                                 .nOut(64)
                                 .activation(Activation.RELU)
                                 .weightInit(WeightInit.XAVIER)
@@ -164,22 +175,50 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         int numSamples = allBehaviors.size();
+        //提取所有不重复的 productId
+        Set<Integer> productIdSet = allBehaviors.stream()
+                .map(UserBehavior::getProductId)
+                .collect(Collectors.toSet());
+        //批量查询这些商品ID对应的分类ID
+        List<Map<String, Object>> productCategoryList = productMapper.selectCategoryIdByProductIds(new ArrayList<>(productIdSet));
+
+        // 2. 手动将List转换为Map<Integer, Integer>
+        Map<Integer, Integer> productToCategoryMap = new HashMap<>();
+        for (Map<String, Object> item : productCategoryList) {
+            // MyBatis默认使用列名作为Map的key，这里假设列名为productId和categoryId
+            Integer productId = (Integer) item.get("productId");
+            Integer categoryId = (Integer) item.get("categoryId");
+            if (productId != null && categoryId != null) {
+                productToCategoryMap.put(productId, categoryId);
+            }
+        }
+
         // 2. 分离输入：创建2个独立的INDArray
         INDArray userIds = Nd4j.create(numSamples, 1);
         INDArray itemIds = Nd4j.create(numSamples, 1);
+        INDArray categoryIds = Nd4j.create(numSamples, 1);
         INDArray labels = Nd4j.create(numSamples, 1);
 
         // 3. 填充数据
         for (int i = 0; i < numSamples; i++) {
             UserBehavior behavior = allBehaviors.get(i);
+            int productId = behavior.getProductId();
+
             userIds.putScalar(i, 0, behavior.getUserId() - 1);
             itemIds.putScalar(i, 0, behavior.getProductId() - 1);
+            Integer categoryId = productToCategoryMap.get(productId);
+            if (categoryId == null) {
+                // 重要：处理找不到分类的情况，比如设置一个默认值或跳过这条数据
+                // 这里我们简单地抛出异常，你可以根据业务需求调整
+                throw new RuntimeException("商品ID为 " + productId + " 的分类未在数据库中找到！");
+            }
+            categoryIds.putScalar(i, 0, categoryId - 1);
             labels.putScalar(i, 0, getWeightByBehaviorType(behavior.getBehaviorTypeId()));
         }
 
         // 4. 创建MultiDataSet
         MultiDataSet multiDataSet = new org.nd4j.linalg.dataset.MultiDataSet(
-                new INDArray[]{userIds, itemIds}, // 输入数组
+                new INDArray[]{userIds, itemIds, categoryIds}, // 输入数组
                 new INDArray[]{labels}            // 标签数组
         );
 
@@ -214,6 +253,9 @@ public class RecommendServiceImpl implements RecommendService {
                 .stream()
                 .collect(Collectors.toSet());
 
+        // 获取所有商品及其类别信息
+        List<Product> allProducts = productMapper.selectAllProducts();
+
         // 3. 生成所有候选商品的ID列表 (1-based)
         List<Integer> allProductIds = IntStream.rangeClosed(1, numProducts)
                 .boxed()
@@ -223,14 +265,17 @@ public class RecommendServiceImpl implements RecommendService {
         int numCandidates = allProductIds.size();
         INDArray userInputPredict = Nd4j.create(numCandidates, 1); // 用户ID输入
         INDArray itemInputPredict = Nd4j.create(numCandidates, 1); // 商品ID输入
+        INDArray categoryInputPredict = Nd4j.create(numCandidates, 1); // 分类ID输入
 
         for (int i = 0; i < numCandidates; i++) {
+            Product product = allProducts.get(i);
             userInputPredict.putScalar(i, 0, userId - 1); // 用户ID转0-based
             itemInputPredict.putScalar(i, 0, allProductIds.get(i) - 1); // 商品ID转0-based
+            categoryInputPredict.putScalar(i, 0, product.getCategoryId() - 1);
         }
 
         // 5. 用INDArray[]封装输入，顺序与模型输入一致（userInput在前，itemInput在后）
-        INDArray[] predictInputs = new INDArray[]{userInputPredict, itemInputPredict};
+        INDArray[] predictInputs = new INDArray[]{userInputPredict, itemInputPredict, categoryInputPredict};
 
         // 6. 调用模型预测（传入2个输入，适配模型）
         INDArray[] outputs = model.output(predictInputs);

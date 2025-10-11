@@ -16,7 +16,7 @@
         productSecondCategory,
         sellCount
         FROM product
-        ORDER BY productId DESC
+        ORDER BY sellCount DESC
             LIMIT #{offset}, #{pageSize}
     </select>
 
@@ -63,5 +63,26 @@
         <foreach collection="projectIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
+    </select>
+
+    <select id="selectCategoryCount" resultType="int">
+        SELECT COUNT(*) FROM category;
+    </select>
+
+    <select id="selectCategoryIdByProductIds" resultType="map">
+        SELECT
+        productId,
+        categoryId
+        FROM
+        product
+        WHERE
+        productId IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectAllProducts" resultType="com.example.recommendation.entity.Product">
+        SELECT * FROM product;
     </select>
 </mapper>
