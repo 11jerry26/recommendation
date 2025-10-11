@@ -317,7 +317,6 @@ public class RecommendServiceImpl implements RecommendService {
                 result.add(product);
             }
         }
-
         return result;
     }
 }
