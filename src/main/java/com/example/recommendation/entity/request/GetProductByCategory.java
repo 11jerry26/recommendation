@@ -4,15 +4,15 @@ public class GetProductByCategory {
     private int pageNum;
     private int pageSize;
     private int userId;
-    private String category;
+    private int categoryId;
 
     public GetProductByCategory(){}
 
-    public GetProductByCategory(int pageNum, int pageSize, int userId, String category) {
+    public GetProductByCategory(int pageNum, int pageSize, int userId, int categoryId) {
         this.pageNum = pageNum;
         this.pageSize = pageSize;
         this.userId = userId;
-        this.category = category;
+        this.categoryId = categoryId;
     }
 
     public int getPageNum() {
@@ -39,12 +39,12 @@ public class GetProductByCategory {
         this.userId = userId;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class GetProductByCategory {
                 "pageNum=" + pageNum +
                 ", pageSize=" + pageSize +
                 ", userId=" + userId +
-                ", category='" + category + '\'' +
+                ", categoryId=" + categoryId +
                 '}';
     }
 }

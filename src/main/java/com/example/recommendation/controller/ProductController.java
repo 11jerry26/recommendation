@@ -38,8 +38,8 @@ public class ProductController {
             int pageNum = getProductByCategory.getPageNum();
             int pageSize = getProductByCategory.getPageSize();
             int userId = getProductByCategory.getUserId();
-            String category = getProductByCategory.getCategory();
-            List<Product> productList = productService.getProductByCategory(pageNum,pageSize,userId,category);
+            int categoryId = getProductByCategory.getCategoryId();
+            List<Product> productList = productService.getProductByCategory(pageNum,pageSize,userId,categoryId);
             return new Result(200,productList,"查询商品列表成功");
         } catch (Exception e) {
             // 服务器异常：属于“请求处理失败”，返回code=500

@@ -11,7 +11,7 @@
         productName,
         price,
         fileName,
-        productCategory,
+        categoryId,
         description,
         productSecondCategory,
         sellCount
@@ -27,13 +27,13 @@
             productName,
             price,
             fileName,
-            productCategory,
+            categoryId,
             description,
             productSecondCategory,
             sellCount
         FROM product
         WHERE
-            productCategory = #{category}
+            categoryId = #{categoryId}
         ORDER BY productId DESC
             LIMIT #{offset}, #{pageSize}
     </select>
@@ -44,7 +44,7 @@
         productName,
         price,
         fileName,
-        productCategory,
+        categoryId,
         description,
         productSecondCategory,
         sellCount

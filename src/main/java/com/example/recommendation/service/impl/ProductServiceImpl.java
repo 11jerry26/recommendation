@@ -20,9 +20,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getProductByCategory(int pageNum, int pageSize, int userId,String category) {
+    public List<Product> getProductByCategory(int pageNum, int pageSize, int userId,int categoryId) {
         int offset = (pageNum - 1) * pageSize;
-        return productMapper.getProductByCategory(offset, pageSize, userId,category);
+        return productMapper.getProductByCategory(offset, pageSize, userId,categoryId);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.example.recommendation.entity;
 
 public class Product {
     private int productId;
-    private String productCategory;
+    private int categoryId;
     private String productName;
     private String productSecondCategory;
     private String fileName;
@@ -12,14 +12,15 @@ public class Product {
 
     public Product() {}
 
-    public Product(int productId, String productCategory, String productName, String productSecondCategory, String fileName, String description, Double price) {
+    public Product(int productId, int categoryId, String productName, String productSecondCategory, String fileName, String description, Double price, int sellCount) {
         this.productId = productId;
-        this.productCategory = productCategory;
+        this.categoryId = categoryId;
         this.productName = productName;
         this.productSecondCategory = productSecondCategory;
         this.fileName = fileName;
         this.description = description;
         this.price = price;
+        this.sellCount = sellCount;
     }
 
     public int getProductId() {
@@ -30,12 +31,12 @@ public class Product {
         this.productId = productId;
     }
 
-    public String getProductCategory() {
-        return productCategory;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setProductCategory(String productCategory) {
-        this.productCategory = productCategory;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getProductName() {
@@ -90,7 +91,7 @@ public class Product {
     public String toString() {
         return "Product{" +
                 "productId=" + productId +
-                ", productCategory='" + productCategory + '\'' +
+                ", categoryId=" + categoryId +
                 ", productName='" + productName + '\'' +
                 ", productSecondCategory='" + productSecondCategory + '\'' +
                 ", fileName='" + fileName + '\'' +

@@ -158,6 +158,8 @@
             userId = #{userId}
           AND behaviorTypeId = #{behaviorTypeId}
           AND isDelete = #{isDelete}
+        ORDER BY
+            behaviorTime DESC
     </select>
 
     <select id="selectUserOrders" resultType="com.example.recommendation.entity.Order">
@@ -173,6 +175,8 @@
         WHERE
             userId = #{userId}
           AND isDelete = #{isDelete}
+        ORDER BY
+            createTime DESC
     </select>
 
     <update id="deleteUserOrder">

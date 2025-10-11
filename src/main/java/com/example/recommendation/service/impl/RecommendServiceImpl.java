@@ -59,36 +59,37 @@ public class RecommendServiceImpl implements RecommendService {
     @PostConstruct
     @Override
     public void initModel() throws IOException {
-        // 1. 获取用户和商品的总数，用于构建模型
+        // 每次初始化时都重新获取最新的用户和商品数量
         numUsers = userMapper.selectUserTotalCount();
         numProducts = productMapper.selectProductTotalCount();
         System.out.println("系统中共有 " + numUsers + " 个用户，" + numProducts + " 个商品。");
 
         File modelFile = new File(MODEL_PATH);
         if (modelFile.exists()) {
-            // 2. 如果模型已存在，直接加载 (注意：这里使用 restoreComputationGraph)
-            System.out.println("正在加载已训练好的推荐模型...");
-            // 使用 restoreComputationGraph 来加载计算图模型
-            model = ModelSerializer.restoreComputationGraph(modelFile);
-            System.out.println("模型加载成功！");
-        } else {
-            // 3. 如果模型不存在，训练一个新模型
-            System.out.println("未找到模型，正在使用数据库数据进行训练...");
-            // 【重要】你的 DataSetIterator 也需要适配 ComputationGraph
-            // 它应该返回一个 DataSet 对象，其中 features 是一个包含两个 INDArray 的数组
-            // 我们稍后会讨论如何修改 prepareTrainingData()
-            MultiDataSetIterator dataSetIterator = prepareTrainingData();
+            // 检查模型是否与新数据兼容
+            ComputationGraph oldModel = ModelSerializer.restoreComputationGraph(modelFile);
 
-            // 这里的赋值现在是正确的，因为 model 和 build 方法的返回类型都是 ComputationGraph
-            model = buildNCFModelWithComputationGraph();
+            // 修正：通过层配置获取nIn参数
+            int oldItemNIn = (int) ((EmbeddingLayer) oldModel.getLayer("itemEmbedding").conf().getLayer()).getNIn();
+            int oldUserNIn = (int) ((EmbeddingLayer) oldModel.getLayer("userEmbedding").conf().getLayer()).getNIn();
 
-            model.fit(dataSetIterator, EPOCHS);
-            System.out.println("模型训练完成！");
-
-            // 4. 保存训练好的模型 (ComputationGraph 和 MultiLayerNetwork 的保存方法相同)
-            ModelSerializer.writeModel(model, modelFile, true);
-            System.out.println("模型已保存至: " + modelFile.getAbsolutePath());
+            if (oldItemNIn == numProducts && oldUserNIn == numUsers) {
+                System.out.println("正在加载已训练好的推荐模型...");
+                model = oldModel;
+                System.out.println("模型加载成功！");
+                return;
+            }
+            System.out.println("模型结构已过期，将重新训练...");
         }
+
+        // 重新训练模型
+        System.out.println("正在使用数据库数据进行训练...");
+        MultiDataSetIterator dataSetIterator = prepareTrainingData();
+        model = buildNCFModelWithComputationGraph();
+        model.fit(dataSetIterator, EPOCHS);
+        System.out.println("模型训练完成！");
+        ModelSerializer.writeModel(model, modelFile, true);
+        System.out.println("模型已保存至: " + modelFile.getAbsolutePath());
     }
 
     /**
