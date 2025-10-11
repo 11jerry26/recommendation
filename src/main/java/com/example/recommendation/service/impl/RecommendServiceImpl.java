@@ -245,7 +245,7 @@ public class RecommendServiceImpl implements RecommendService {
         if (userId == null || userId <= 0 || userId > numUsers) {
             // 如果是新用户或无效用户，返回热门商品
             int offset = (pageNum - 1) * pageSize;
-            return productMapper.getProductByPage(offset, pageSize, userId);
+            return productMapper.getProductByPage(offset, pageSize, userId,"");
         }
 
         // 2. 获取用户已经购买过的商品，避免重复推荐

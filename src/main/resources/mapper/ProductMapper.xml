@@ -15,9 +15,22 @@
         description,
         productSecondCategory,
         sellCount
-        FROM product
-        ORDER BY sellCount DESC
-            LIMIT #{offset}, #{pageSize}
+        FROM
+        product
+        <where>
+            <!--
+              <if test="..."> 标签内的条件为真时，才会将其内部的 SQL 片段拼接到主语句中。
+              test="searchInput != null and searchInput != ''" 确保只有当 searchInput 不为 null 且不为空字符串时，才执行筛选。
+              CONCAT('%', #{searchInput}, '%') 用于在搜索词前后加上通配符 %，实现模糊匹配。
+              LIKE 用于进行模糊匹配查询。
+            -->
+            <if test="searchInput != null and searchInput != ''">
+                AND description LIKE CONCAT('%', #{searchInput}, '%')
+            </if>
+        </where>
+        ORDER BY
+        sellCount DESC
+        LIMIT #{offset}, #{pageSize}
     </select>
 
     <!--    分类分页查询商品列表-->

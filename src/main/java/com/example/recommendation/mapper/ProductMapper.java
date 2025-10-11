@@ -10,7 +10,7 @@ import java.util.Map;
 @Mapper
 public interface ProductMapper {
     //分页查询商品列表
-    public List<Product> getProductByPage(int offset, int pageSize, int userId);
+    public List<Product> getProductByPage(int offset, int pageSize, int userId, String searchInput);
 
     //根据分类分页查询商品列表
     public List<Product> getProductByCategory(int offset, int pageSize, int userId,int categoryId);
