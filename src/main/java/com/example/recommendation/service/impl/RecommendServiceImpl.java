@@ -46,6 +46,9 @@ public class RecommendServiceImpl implements RecommendService {
     @Autowired
     UserMapper userMapper;
 
+    // 保存上次的行为记录数量
+    private Long lastBehaviorCount = null;
+
     private static final String MODEL_PATH = "recommendation-model.zip";
     private static final int BATCH_SIZE = 128;
     private static final int EPOCHS = 10;
@@ -65,31 +68,72 @@ public class RecommendServiceImpl implements RecommendService {
         System.out.println("系统中共有 " + numUsers + " 个用户，" + numProducts + " 个商品。");
 
         File modelFile = new File(MODEL_PATH);
+        boolean shouldRetrain = false;
+
         if (modelFile.exists()) {
             // 检查模型是否与新数据兼容
             ComputationGraph oldModel = ModelSerializer.restoreComputationGraph(modelFile);
 
-            // 修正：通过层配置获取nIn参数
+            // 通过层配置获取nIn参数
             int oldItemNIn = (int) ((EmbeddingLayer) oldModel.getLayer("itemEmbedding").conf().getLayer()).getNIn();
             int oldUserNIn = (int) ((EmbeddingLayer) oldModel.getLayer("userEmbedding").conf().getLayer()).getNIn();
 
-            if (oldItemNIn == numProducts && oldUserNIn == numUsers) {
-                System.out.println("正在加载已训练好的推荐模型...");
+            // 检查用户和商品数量是否变化
+            boolean sizeChanged = (oldItemNIn != numProducts || oldUserNIn != numUsers);
+
+            // 检查行为数据是否变化
+            boolean behaviorChanged = checkBehaviorDataChanged();
+
+            if (!sizeChanged && !behaviorChanged) {
+                System.out.println("模型结构和数据均未变化，加载现有模型");
                 model = oldModel;
-                System.out.println("模型加载成功！");
                 return;
             }
-            System.out.println("模型结构已过期，将重新训练...");
+
+            if (sizeChanged) {
+                System.out.println("用户或商品数量变化，需要重新训练模型");
+            }
+            if (behaviorChanged) {
+                System.out.println("行为数据变化，需要重新训练模型");
+            }
+            shouldRetrain = true;
+        } else {
+            System.out.println("模型文件不存在，需要训练新模型");
+            shouldRetrain = true;
         }
 
-        // 重新训练模型
-        System.out.println("正在使用数据库数据进行训练...");
-        MultiDataSetIterator dataSetIterator = prepareTrainingData();
-        model = buildNCFModelWithComputationGraph();
-        model.fit(dataSetIterator, EPOCHS);
-        System.out.println("模型训练完成！");
-        ModelSerializer.writeModel(model, modelFile, true);
-        System.out.println("模型已保存至: " + modelFile.getAbsolutePath());
+        if (shouldRetrain) {
+            // 重新训练模型
+            System.out.println("开始重新训练模型...");
+            MultiDataSetIterator dataSetIterator = prepareTrainingData();
+            model = buildNCFModelWithComputationGraph();
+            model.fit(dataSetIterator, EPOCHS);
+            System.out.println("模型训练完成！");
+            ModelSerializer.writeModel(model, modelFile, true);
+            System.out.println("模型已保存至: " + modelFile.getAbsolutePath());
+        }
+    }
+
+    private synchronized boolean checkBehaviorDataChanged() {
+        // 获取当前行为记录总数
+        Long currentBehaviorCount = behaviorMapper.selectBehaviorTotalCount();
+
+        // 首次检测或记录数为null，保存当前值并返回true(需要训练)
+        if (lastBehaviorCount == null) {
+            lastBehaviorCount = currentBehaviorCount;
+            System.out.println("首次检测行为数据，记录数: " + currentBehaviorCount);
+            return true;
+        }
+
+        // 比较当前记录数与上次记录数
+        if (!currentBehaviorCount.equals(lastBehaviorCount)) {
+            System.out.println("行为记录数量变化: " + lastBehaviorCount + " -> " + currentBehaviorCount);
+            lastBehaviorCount = currentBehaviorCount;
+            return true;
+        }
+
+        System.out.println("行为记录数量未变化: " + currentBehaviorCount);
+        return false;
     }
 
     /**

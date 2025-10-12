@@ -215,4 +215,8 @@
         WHERE userId = #{userId} AND isDelete = 0 AND behaviorTypeId = 4
         ORDER BY behaviorTime DESC
     </select>
+
+    <select id="selectBehaviorTotalCount" resultType="long">
+        SELECT COUNT(*) FROM user_behavior WHERE isDelete = 0
+    </select>
 </mapper>

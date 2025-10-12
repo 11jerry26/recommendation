@@ -82,4 +82,7 @@ public interface BehaviorMapper {
 
     //获取用户已经购买过的商品id
     public List<Integer> selectProductIdsByUserId(int userId);
+
+    //查询行为表中有效行为总数
+    public long selectBehaviorTotalCount();
 }
